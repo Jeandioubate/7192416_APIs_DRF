@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from shop.models import Category, Product
 from shop.serializers import CategorySerializer, ProductSerializer
@@ -22,7 +22,8 @@ class ProductAPIView(APIView):
 """
 
 
-class CategoryViewset(ModelViewSet):
+class CategoryViewset(ReadOnlyModelViewSet):
+
     serializer_class = CategorySerializer
 
     def get_queryset(self):
