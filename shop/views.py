@@ -21,10 +21,16 @@ class ProductAPIView(APIView):
         return Response(serializer.data)
 """
 
-
 class CategoryViewset(ReadOnlyModelViewSet):
 
     serializer_class = CategorySerializer
 
     def get_queryset(self):
         return Category.objects.all()
+
+class ProductViewset(ReadOnlyModelViewSet):
+
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.all()
