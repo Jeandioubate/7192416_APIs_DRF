@@ -3,10 +3,22 @@ from rest_framework.serializers import ModelSerializer
 
 from shop.models import Category, Product, Article
 
-class ProductSerializer(ModelSerializer):
+class ArticleSerializer(ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ['id', 'date_created', 'date_updated', 'name', 'price', 'product_id']
+
+class ProductSerializer(serializers.ModelSerializer):
+    articles = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
-        fields = ['id', 'date_created', 'date_updated', 'name', 'category_id']
+        fields = ['id', 'date_created', 'date_updated', 'name', 'category_id', 'articles']
+
+    def get_articles(self, instance):
+        queryset = instance.articles.filter(active=True)
+        serializer = ArticleSerializer(queryset, many=True)
+        return serializer.data
 
 class CategorySerializer(serializers.ModelSerializer):
 
@@ -31,7 +43,4 @@ class CategorySerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class ArticleSerializer(ModelSerializer):
-    class Meta:
-        model = Article
-        fields = ['id', 'date_created', 'date_updated', 'name', 'price', 'product_id']
+
