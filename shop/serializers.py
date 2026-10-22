@@ -20,8 +20,12 @@ class ProductSerializer(serializers.ModelSerializer):
         serializer = ArticleSerializer(queryset, many=True)
         return serializer.data
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'date_created', 'date_updated', 'name']
 
+class CategoryDetailSerializer(serializers.ModelSerializer):
     # En utilisant un 'SerializerMethodField', il est nécessaire d'écrire une méthode
     # nommée "get_xxx" où xxx est le nom de l'attribut, ici 'products'.
     products = serializers.SerializerMethodField()
