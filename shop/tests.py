@@ -21,7 +21,34 @@ class ShopAPITestCase(APITestCase):
         # de caractères sous le même format que celui de l’api.
         return value.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
+    def get_product_detail_data(self, products):
+        return [
+            {
+                'id': product.pk,
+                'name': product.name,
+                'date_created': self.format_datetime(product.date_created),
+                'date_updated': self.format_datetime(product.date_updated),
+                'category_id': product.category_id,
+                'articles': [],
+            } for product in products
+        ]
+
 class TestCategory(ShopAPITestCase):
+    def test_detail(self):
+        # Nous utilisons l'url de détail
+        url_detail = reverse('category-detail', kwargs={'pk': self.category.pk})
+        response = self.client.get(url_detail)
+        # Nous vérifions également le status code de retour ainsi que les données reçues
+        self.assertEqual(response.status_code, 200)
+        excepted = {
+            'id': self.category.pk,
+            'name': self.category.name,
+            'date_created': self.format_datetime(self.category.date_created),
+            'date_updated': self.format_datetime(self.category.date_updated),
+            'products': self.get_product_detail_data(self.category.products.filter(active=True)),
+        }
+        self.assertEqual(excepted, response.json())
+
     # Nous stockons l’url de l'endpoint dans un attribut de classe pour pouvoir
     # l’utiliser plus facilement dans chacun de nos tests.
     url = reverse_lazy('category-list')
@@ -40,7 +67,7 @@ class TestCategory(ShopAPITestCase):
                 'date_updated': self.format_datetime(category.date_updated),
             } for category in [self.category, self.category_2]
         ]
-        self.assertEqual(excepted, response.json())
+        self.assertEqual(excepted, response.json()['results'])
 
     def test_create(self):
         # Nous vérifions qu’aucune catégorie n'existe avant de tenter d’en créer une
@@ -56,26 +83,15 @@ class TestProduct(ShopAPITestCase):
 
     url = reverse_lazy('product-list')
 
-    def get_product_detail_data(self, products):
-        return [
-            {
-                'id': product.pk,
-                'name': product.name,
-                'date_created': self.format_datetime(product.date_created),
-                'date_updated': self.format_datetime(product.date_updated),
-                'category_id': product.category_id
-            } for product in products
-        ]
-
     def test_list(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.get_product_detail_data([self.product, self.product_2]), response.json())
+        self.assertEqual(self.get_product_detail_data([self.product, self.product_2]), response.json()['results'])
 
     def test_list_filter(self):
         response = self.client.get(self.url + '?category_id=%i' % self.category.pk)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.get_product_detail_data([self.product]), response.json())
+        self.assertEqual(self.get_product_detail_data([self.product]), response.json()['results'])
 
     def test_create(self):
         product_count = Product.objects.count()
