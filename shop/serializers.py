@@ -3,10 +3,10 @@ from rest_framework.serializers import ModelSerializer
 
 from shop.models import Category, Product, Article
 
-class ArticleSerializer(ModelSerializer):
+class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['id', 'date_created', 'date_updated', 'name', 'price', 'product_id']
+        fields = ['id', 'date_created', 'date_updated', 'name', 'price', 'product']
 
     def validate_price(self, value):
         if value < 1:
@@ -20,15 +20,15 @@ class ArticleSerializer(ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Category
-        fields = ['id', 'date_created', 'date_updated', 'name']
+        model = Product
+        fields = ['id', 'date_created', 'date_updated', 'name', 'category', 'ecoscore']
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     articles = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'date_created', 'date_updated', 'name', 'category_id', 'articles']
+        fields = ['id', 'date_created', 'date_updated', 'name', 'category', 'articles']
 
     def get_articles(self, instance):
         queryset = instance.articles.filter(active=True)
